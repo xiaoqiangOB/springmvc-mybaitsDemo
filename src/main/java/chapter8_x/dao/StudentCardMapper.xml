@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chapter8_x.dao.StudentCardDao">
+  <resultMap id="BaseResultMap" type="chapter8_x.entity.StudentCard">
+    <id column="card_id" jdbcType="INTEGER" property="cardId" />
+    <result column="student_no" jdbcType="INTEGER" property="studentNo" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="start_time" jdbcType="DATE" property="startTime" />
+    <result column="end_time" jdbcType="DATE" property="endTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    card_id, student_no, address, start_time, end_time, remark
+  </sql>
+<select id="findStudentCardByStudentNo" parameterType="int" resultMap="BaseResultMap">
+	select <include refid="Base_Column_List"/>
+	from student_card where student_no = #{studentNo}
+</select>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jdbc="http://www.springframework.org/schema/jdbc"  
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:task="http://www.springframework.org/schema/task" xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd"
+	default-lazy-init="true">
+	
+	<!-- 支持注解 -->
+	<context:annotation-config/>
+	<!-- 自动扫描的包 -->
+	<context:component-scan base-package="chapter8_x" use-default-filters="false">
+	<!-- 通过注解去过滤扫描的类 -->
+	<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+	<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+	</context:component-scan>
+	
+	<!-- 数据源 注入我们所需的数据源 -->
+	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/chapter8_x</value>
+		</property>
+	</bean> -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		 <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+	    
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="jdbc:mysql://localhost:3306/travel" />
+		<property name="username" value="root"/>
+		<property name="password" value="123456"/>
+		
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="minIdle" value="30" /> 
+		<property name="maxActive" value="50" />
+		<property name="maxWait" value="60000" />
+	</bean>
+	
+	<!-- Mybatis的SqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" scope="prototype">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="configLocation" value="classpath:sqlMapConfig.xml"/>
+	</bean>
+    
+    <!-- SqlSessionTemplate -->
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+    	<constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+    
+    <!-- 事务管理 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    	<property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 使用注解管理事物 -->
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+    
+    <!-- 采用自动扫描方式创建mapper bean -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    	<property name="basePackage" value="chapter8_x"/>
+    	<property name="sqlSessionTemplateBeanName" value="sqlSessionTemplate"/>
+    	<property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+    </bean>
+</beans>
